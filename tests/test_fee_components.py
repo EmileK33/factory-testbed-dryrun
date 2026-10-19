@@ -4,7 +4,6 @@ import pytest
 
 from src.normalise import (
     FLAT_FEE,
-    HANDLING_BP,
     _flat_component,
     _handling_component,
     fee_for,
@@ -12,7 +11,7 @@ from src.normalise import (
 
 
 def test_flat_component_is_the_flat_fee_in_every_region():
-    for region in (*HANDLING_BP, "XX"):
+    for region in ("EU", "NA", "APAC", "XX"):
         assert _flat_component({"amount": 1000, "region": region}) == FLAT_FEE
 
 
@@ -42,4 +41,5 @@ def test_handling_component_does_not_include_the_flat_fee():
 def test_fee_for_is_the_sum_of_its_components(amount, region):
     record = {"amount": amount, "region": region}
     assert fee_for(record) == _flat_component(record) + _handling_component(record)
-    assert fee_for(record) == FLAT_FEE + amount * HANDLING_BP.get(region, 0) // 10000
+    rate = {"EU": 1500, "NA": 500, "APAC": 0}.get(region, 0)
+    assert fee_for(record) == 25 + amount * rate // 10000
