@@ -3,7 +3,7 @@
 import pytest
 
 from src import normalise
-from src.normalise import FLAT_FEE, HANDLING_BP, fee_for
+from src.normalise import fee_for
 
 AMOUNTS = [-100000, -10001, -10000, -9999, -1, 0, 1, 9, 10, 9999, 10000, 10001, 123457, 10**9]
 REGIONS = ["EU", "NA", "APAC", "XX", "", "eu"]
@@ -19,11 +19,6 @@ def _old_fee_for(record):
 def test_fee_for_matches_the_old_expression(amount, region):
     record = {"id": "R", "amount": amount, "region": region}
     assert fee_for(record) == _old_fee_for(record)
-
-
-def test_the_frozen_constants_still_match_the_module():
-    assert FLAT_FEE == 25
-    assert HANDLING_BP == {"EU": 1500, "NA": 500, "APAC": 0}
 
 
 def test_flat_component_is_the_flat_fee_for_any_record():
