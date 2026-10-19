@@ -109,13 +109,17 @@ CASES = [
 
 @pytest.mark.parametrize(("amount", "region", "fee"), CASES)
 def test_fee_for_is_unchanged(amount, region, fee):
-    assert fee_for({"amount": amount, "region": region}) == fee
+    got = fee_for({"amount": amount, "region": region})
+    # Money is integer cents end to end: 25.0 == 25, so check the type as well.
+    assert type(got) is int
+    assert got == fee
 
 
 @pytest.mark.parametrize(("amount", "region", "fee"), CASES)
 def test_fee_for_is_the_sum_of_its_components(amount, region, fee):
     record = {"amount": amount, "region": region}
     assert _flat_component(record) == 25
+    assert type(_handling_component(record)) is int
     assert _flat_component(record) + _handling_component(record) == fee
 
 
