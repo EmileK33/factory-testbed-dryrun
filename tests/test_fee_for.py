@@ -41,6 +41,18 @@ def test_identity_value_matches_the_original_expression(region, amount):
     assert fee_for(record) == _original(record)
 
 
+def test_identity_value_matches_the_original_expression_beyond_the_grid():
+    amounts = [*range(-20003, 20004, 7), 3333, 6667, 10**18 + 1, -(10**18) - 1]
+    mismatches = [
+        (region, amount)
+        for region in REGIONS
+        for amount in amounts
+        if fee_for({"amount": amount, "region": region})
+        != _original({"amount": amount, "region": region})
+    ]
+    assert mismatches == []
+
+
 def test_identity_missing_region_raises_key_error_for_region():
     with pytest.raises(KeyError) as info:
         fee_for({"amount": 5})

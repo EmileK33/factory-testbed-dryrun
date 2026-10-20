@@ -9,7 +9,7 @@ the gates; only a change spanning rows needs the whole suite.
 | validation contract | `src/validate.py` | `tests/test_validate.py` | the field contract and the accepted code lists |
 | packed columns | `src/parse.py` | `tests/test_parse.py` | called from `check_record()` when normalising a record |
 | conversion | `src/rates.py` | `tests/test_conversion.py` | basis-point arithmetic; expectations coupled to `data/rates.json` |
-| fees | `src/normalise.py` | `tests/test_pipeline.py` | the negative-gross guard lives here; coupled to no data file |
+| fees | `src/normalise.py` | `tests/test_pipeline.py`, `tests/test_fee_for.py` | the negative-gross guard lives here; `fee_for()` values are frozen in `test_fee_for.py`; coupled to no data file |
 | counting | `src/summarise.py` | `tests/test_counts.py` | expectations coupled to `data/records.json` |
 | report rendering | `src/report.py` | `tests/test_report.py`, `tests/test_golden.py` | **any change here changes an emitted artifact** |
 | the committed artifact | `artifacts/report.golden.txt` | `tests/test_golden.py` | byte-for-byte; regenerate with `python -m tools.write_golden` |
