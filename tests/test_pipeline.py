@@ -9,7 +9,7 @@ routing table.
 
 import pytest
 
-from src.normalise import apply_fees
+from src.normalise import _flat_component, _handling_component, apply_fees, fee_for
 
 
 def test_apply_fees_rejects_a_negative_gross_amount():
@@ -20,3 +20,26 @@ def test_apply_fees_rejects_a_negative_gross_amount():
 def test_apply_fees_charges_the_regional_handling_rate():
     [row] = apply_fees([{"id": "R-9", "amount": 1000, "region": "EU"}])
     assert row["net"] == 1000 - (25 + 150)
+
+
+_FEE_SPLIT_AMOUNTS = (0, 1, 9999, 10000, 10001, 99999, 10**15 + 1)
+_FEE_SPLIT_REGIONS = ("EU", "NA", "APAC", "XX")
+_FEE_SPLIT_BP = {"EU": 1500, "NA": 500, "APAC": 0}
+
+
+def test_fee_split_matches_the_single_expression():
+    for amount in _FEE_SPLIT_AMOUNTS:
+        for region in _FEE_SPLIT_REGIONS:
+            record = {"id": "R-1", "amount": amount, "region": region}
+            expected = 25 + amount * _FEE_SPLIT_BP.get(region, 0) // 10000
+            assert fee_for(record) == expected
+            assert fee_for(record) == _flat_component() + _handling_component(record)
+
+
+def test_fee_split_components_are_pinned():
+    assert _flat_component() == 25
+    assert _handling_component({"amount": 1000, "region": "EU"}) == 150
+    assert _handling_component({"amount": 1000, "region": "NA"}) == 50
+    assert _handling_component({"amount": 1000, "region": "APAC"}) == 0
+    assert _handling_component({"amount": 1000, "region": "XX"}) == 0
+    assert _handling_component({"amount": 9999, "region": "NA"}) == 499
