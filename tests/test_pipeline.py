@@ -9,7 +9,7 @@ routing table.
 
 import pytest
 
-from src.normalise import apply_fees, fee_for
+from src.normalise import _flat_component, _handling_component, apply_fees, fee_for
 
 
 def test_apply_fees_rejects_a_negative_gross_amount():
@@ -37,3 +37,16 @@ def test_apply_fees_charges_the_regional_handling_rate():
 )
 def test_fee_for_is_the_flat_fee_plus_the_floored_handling_charge(region, amount, fee):
     assert fee_for({"region": region, "amount": amount}) == fee
+
+
+@pytest.mark.parametrize("region", ["EU", "NA", "APAC", "XX"])
+def test_the_flat_component_is_the_flat_fee_alone(region):
+    assert _flat_component({"region": region, "amount": 10000}) == 25
+
+
+@pytest.mark.parametrize(
+    ("region", "amount", "handling"),
+    [("EU", 1000, 150), ("EU", 10000, 1500), ("NA", 999, 49), ("APAC", 500, 0), ("XX", 700, 0), ("EU", -1, -1)],
+)
+def test_the_handling_component_is_the_floored_regional_charge_alone(region, amount, handling):
+    assert _handling_component({"region": region, "amount": amount}) == handling
