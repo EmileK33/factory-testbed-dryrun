@@ -14,7 +14,7 @@ def _flat_component(record: dict) -> int:
 
 
 def _handling_component(record: dict) -> int:
-    """Return the regional handling charge on the gross amount, in whole cents."""
+    """Return the regional handling charge on the gross amount."""
     return record["amount"] * HANDLING_BP.get(record["region"], 0) // 10000
 
 
