@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import re
 
 _TAG_SEPARATOR = re.compile(r",\s*")
@@ -42,4 +43,10 @@ def parse_tags(raw: str | None) -> list[str]:
         return [str(tag).strip() for tag in raw if str(tag).strip()]
     if not isinstance(raw, str) or not raw:
         return []
-    return [part.strip().strip('"') for part in _TAG_SEPARATOR.split(raw) if part.strip()]
+    try:
+        # csv understands the exporter's quoting, so a quoted tag containing a
+        # comma stays one tag.
+        parts = next(csv.reader([raw], skipinitialspace=True), [])
+    except csv.Error:
+        parts = [part.strip('"') for part in _TAG_SEPARATOR.split(raw)]
+    return [part.strip() for part in parts if part.strip()]

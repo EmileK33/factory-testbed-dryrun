@@ -11,6 +11,22 @@ def test_parse_tags_tolerates_spacing_after_the_separator():
     assert parse_tags("apac, bulk") == ["apac", "bulk"]
 
 
+def test_parse_tags_keeps_a_quoted_tag_with_a_comma_as_one_tag():
+    assert parse_tags('eu,"high,priority",settled') == ["eu", "high,priority", "settled"]
+
+
+def test_parse_tags_honours_a_quote_after_a_space():
+    assert parse_tags('a, "b,c"') == ["a", "b,c"]
+
+
+def test_parse_tags_does_not_raise_on_an_unterminated_quote():
+    assert isinstance(parse_tags('a,"b'), list)
+
+
+def test_parse_tags_falls_back_to_the_plain_split_when_csv_raises():
+    assert parse_tags("a,b\nc") == ["a", "b\nc"]
+
+
 def test_parse_tags_returns_nothing_for_a_blank_column():
     assert parse_tags("") == []
     assert parse_tags(None) == []
