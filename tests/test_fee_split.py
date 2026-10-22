@@ -3,7 +3,10 @@
 import pytest
 
 import src.normalise as normalise
-from src.normalise import FLAT_FEE, HANDLING_BP, fee_for
+from src.normalise import FLAT_FEE, fee_for
+
+# Independent copy of the rate table, so a change to the real table is caught here.
+ORACLE_BP = {"EU": 1500, "NA": 500, "APAC": 0}
 
 AMOUNTS = [0, 1, 99, 100, 9999, 10000, 10001, 123456, -1, -9999]
 REGIONS = ["EU", "NA", "APAC", "XX"]
@@ -12,7 +15,7 @@ GRID = [(a, r) for a in AMOUNTS for r in REGIONS]
 
 def _original(record):
     """The expression fee_for() held before the split."""
-    return FLAT_FEE + record["amount"] * HANDLING_BP.get(record["region"], 0) // 10000
+    return 25 + record["amount"] * ORACLE_BP.get(record["region"], 0) // 10000
 
 
 def test_equivalence_with_the_original_expression():
