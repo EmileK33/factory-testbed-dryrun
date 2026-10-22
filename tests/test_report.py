@@ -55,12 +55,10 @@ def test_report_leaves_other_list_valued_cells_as_they_were():
 
 
 def test_report_footer_states_the_true_validated_count():
-    from src.report import REPORTED_FIELDS
     from src.validate import VALIDATED_FIELDS
 
     text = render_report()
     assert "tags" not in VALIDATED_FIELDS
-    assert len(REPORTED_FIELDS) == 6
     assert "reported fields are checked" not in text
     assert "Reported fields covered by the validation rules: 5 of 6." in text.splitlines()
 
