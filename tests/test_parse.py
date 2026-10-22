@@ -19,6 +19,10 @@ def test_parse_tags_honours_a_quote_after_a_space():
     assert parse_tags('a, "b,c"') == ["a", "b,c"]
 
 
+def test_parse_tags_strips_space_before_the_separator():
+    assert parse_tags('eu ,"high,priority" ,settled ') == ["eu", "high,priority", "settled"]
+
+
 def test_parse_tags_does_not_raise_on_an_unterminated_quote():
     assert parse_tags('a,"b') == ["a", "b"]
 
