@@ -11,6 +11,43 @@ def test_parse_tags_tolerates_spacing_after_the_separator():
     assert parse_tags("apac, bulk") == ["apac", "bulk"]
 
 
+def test_parse_tags_keeps_a_quoted_tag_with_a_comma_as_one_tag():
+    assert parse_tags('eu,"high,priority",settled') == ["eu", "high,priority", "settled"]
+
+
+def test_parse_tags_honours_a_quote_after_a_space():
+    assert parse_tags('a, "b,c"') == ["a", "b,c"]
+
+
+def test_parse_tags_strips_space_before_the_separator():
+    assert parse_tags('eu ,"high,priority" ,settled ') == ["eu", "high,priority", "settled"]
+
+
+def test_parse_tags_does_not_raise_on_an_unterminated_quote():
+    assert parse_tags('a,"b') == ["a", "b"]
+
+
+def test_parse_tags_falls_back_to_the_plain_split_when_csv_raises():
+    assert parse_tags("a,b\nc") == ["a", "b\nc"]
+
+
+def test_parse_tags_fallback_strips_whitespace_before_quotes():
+    assert parse_tags(' "a" ,b\nc') == ["a", "b\nc"]
+
+
+def test_parse_tags_drops_an_empty_trailing_entry():
+    assert parse_tags("na,settled,") == ["na", "settled"]
+    assert parse_tags("na,,settled") == ["na", "settled"]
+
+
+def test_parse_tags_fallback_drops_an_empty_entry():
+    assert parse_tags("a,,b\nc") == ["a", "b\nc"]
+
+
+def test_parse_tags_drops_blank_entries_of_a_list():
+    assert parse_tags(["a", " ", "", "b"]) == ["a", "b"]
+
+
 def test_parse_tags_returns_nothing_for_a_blank_column():
     assert parse_tags("") == []
     assert parse_tags(None) == []
