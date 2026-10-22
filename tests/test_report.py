@@ -54,6 +54,27 @@ def test_report_leaves_other_list_valued_cells_as_they_were():
     assert row.startswith("R-9") and "[1]" in row
 
 
+def test_report_keeps_a_tag_with_a_newline_on_one_row():
+    record = {
+        "id": "R-9",
+        "name": "N",
+        "amount": 5,
+        "currency": "USD",
+        "region": "NA",
+        "tags": "a,b\nc",
+    }
+    lines = _lines([record])
+    assert lines[5].startswith("R-9") and lines[5].endswith("  a; b c")
+    assert lines[6] == ""
+
+
+def test_report_footer_count_is_computed_from_validated_fields(monkeypatch):
+    from src import validate
+
+    monkeypatch.setattr(validate, "VALIDATED_FIELDS", ("id", "name"))
+    assert "Reported fields covered by the validation rules: 2 of 6." in _lines()
+
+
 def test_report_footer_states_the_true_validated_count():
     from src.validate import VALIDATED_FIELDS
 

@@ -20,11 +20,28 @@ def test_parse_tags_honours_a_quote_after_a_space():
 
 
 def test_parse_tags_does_not_raise_on_an_unterminated_quote():
-    assert isinstance(parse_tags('a,"b'), list)
+    assert parse_tags('a,"b') == ["a", "b"]
 
 
 def test_parse_tags_falls_back_to_the_plain_split_when_csv_raises():
     assert parse_tags("a,b\nc") == ["a", "b\nc"]
+
+
+def test_parse_tags_fallback_strips_whitespace_before_quotes():
+    assert parse_tags(' "a" ,b\nc') == ["a", "b\nc"]
+
+
+def test_parse_tags_drops_an_empty_trailing_entry():
+    assert parse_tags("na,settled,") == ["na", "settled"]
+    assert parse_tags("na,,settled") == ["na", "settled"]
+
+
+def test_parse_tags_fallback_drops_an_empty_entry():
+    assert parse_tags("a,,b\nc") == ["a", "b\nc"]
+
+
+def test_parse_tags_drops_blank_entries_of_a_list():
+    assert parse_tags(["a", " ", "", "b"]) == ["a", "b"]
 
 
 def test_parse_tags_returns_nothing_for_a_blank_column():

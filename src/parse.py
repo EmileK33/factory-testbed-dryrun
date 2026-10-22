@@ -48,5 +48,6 @@ def parse_tags(raw: str | None) -> list[str]:
         # comma stays one tag.
         parts = next(csv.reader([raw], skipinitialspace=True), [])
     except csv.Error:
-        parts = [part.strip('"') for part in _TAG_SEPARATOR.split(raw)]
+        # The pre-csv behaviour, unchanged, for a column csv cannot read.
+        return [part.strip().strip('"') for part in _TAG_SEPARATOR.split(raw) if part.strip()]
     return [part.strip() for part in parts if part.strip()]

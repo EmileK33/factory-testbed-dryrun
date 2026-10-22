@@ -30,7 +30,9 @@ def _missing(value: object) -> bool:
 def _cell(row: dict, field: str) -> str:
     value = row.get(field)
     if field == "tags" and isinstance(value, list):
-        value = "; ".join(value)
+        # One line per row: a tag is free text from the feed, so any whitespace
+        # run inside it (a newline included) becomes a single space.
+        value = "; ".join(" ".join(tag.split()) for tag in value)
     return "-" if _missing(value) else str(value)
 
 
