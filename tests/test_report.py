@@ -54,11 +54,10 @@ def test_report_shows_a_dash_for_a_record_without_tags():
 
 def test_report_footer_states_the_true_validated_count():
     from src import validate
-    from src.report import REPORTED_FIELDS
-
     text = render_report()
-    covered = len([f for f in REPORTED_FIELDS if f in validate.VALIDATED_FIELDS])
-    assert f"Reported fields covered by validation: {covered} of {len(REPORTED_FIELDS)}" in text.split("\n")
+    columns = _table_rows(text)[0].split()
+    covered = len([f for f in columns if f in validate.VALIDATED_FIELDS])
+    assert f"Reported fields covered by validation: {covered} of {len(columns)}" in text.split("\n")
     assert "reported fields are checked by the validation rules" not in text
     assert "tags" not in validate.VALIDATED_FIELDS
     assert "tags" not in [ln for ln in text.split("\n") if ln.startswith("Validation covers:")][0]
