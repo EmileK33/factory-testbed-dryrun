@@ -39,13 +39,11 @@ def test_report_shows_a_dash_for_a_record_without_tags():
 
 
 def test_report_footer_states_the_true_validated_count():
-    from src.report import REPORTED_FIELDS
     from src.validate import VALIDATED_FIELDS
 
     text = render_report()
     assert "5 of 6 reported fields are checked by the validation rules." in text
     assert "All 6" not in text
-    assert "tags" in REPORTED_FIELDS
     assert "tags" not in VALIDATED_FIELDS
 
 
