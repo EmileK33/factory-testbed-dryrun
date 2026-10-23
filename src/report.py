@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from src import validate
 from src.normalise import apply_fees
+from src.parse import parse_tags
 from src.rates import to_usd_cents
 from src.records import load_records
 from src.validate import ALLOWED_PAIRS, check_record
@@ -30,7 +31,7 @@ def _missing(value: object) -> bool:
 def _cell(row: dict, field: str) -> str:
     value = row.get(field)
     if isinstance(value, (list, tuple)):
-        value = "; ".join(str(item) for item in value if str(item).strip())
+        value = "; ".join(parse_tags(value))
     return "-" if _missing(value) else str(value)
 
 

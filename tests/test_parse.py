@@ -1,5 +1,7 @@
 """Tests for the packed-column helpers."""
 
+import pytest
+
 from src.parse import parse_tags
 
 
@@ -84,6 +86,61 @@ def test_parse_tags_blank_after_stripping_yields_nothing():
 
 def test_parse_tags_is_idempotent_on_the_quoted_witness():
     once = parse_tags('eu,"high,priority",\nsettled')
+    assert parse_tags(once) == once
+
+
+WHITESPACE_BEFORE_A_QUOTE = {
+    "TAB": "\t",
+    "NBSP": " ",
+    "VT": "\x0b",
+    "FF": "\x0c",
+    "U+2007": " ",
+    "U+202F": " ",
+    "CRLF+TAB": "\r\n\t",
+    "mixed": " \t \x0b",
+}
+
+
+@pytest.mark.parametrize("gap", list(WHITESPACE_BEFORE_A_QUOTE.values()), ids=list(WHITESPACE_BEFORE_A_QUOTE))
+def test_parse_tags_whitespace_before_a_quote_does_not_hide_the_quote(gap):
+    assert parse_tags(f'eu,{gap}"high,priority",settled') == QUOTED
+
+
+def test_parse_tags_treats_every_whitespace_character_alike():
+    every = [chr(i) for i in range(0x110000) if chr(i).isspace()]
+    assert len(every) >= 25  # the denominator: the str.split() set, not a sample
+    for gap in every:
+        assert parse_tags(f'eu,{gap}"high,priority",settled') == QUOTED, hex(ord(gap))
+        assert parse_tags(f'eu,"high{gap}priority"{gap},settled') == ["eu", "high priority", "settled"]
+        assert parse_tags(f"{gap}na,{gap}settled{gap}") == ["na", "settled"]
+        assert parse_tags(gap + gap) == []
+
+
+def test_parse_tags_skips_a_space_before_an_opening_quote():
+    assert parse_tags('eu, "high,priority", settled') == QUOTED
+
+
+def test_parse_tags_collapses_a_run_of_spaces_inside_a_quoted_tag():
+    # Side effect of the one normalisation: whitespace inside a tag is not preserved.
+    assert parse_tags('eu,"high   priority",settled') == ["eu", "high priority", "settled"]
+    assert parse_tags('eu,"high\t  priority",settled') == ["eu", "high priority", "settled"]
+
+
+def test_parse_tags_normalises_a_list_element_with_a_line_break():
+    assert parse_tags(["high\npriority", "settled"]) == ["high priority", "settled"]
+    assert parse_tags(("a\r\n\tb", "c d")) == ["a b", "c d"]
+    assert parse_tags(["a   b"]) == ["a b"]
+
+
+def test_parse_tags_drops_none_and_empty_list_elements():
+    assert parse_tags(["a", None, "b"]) == ["a", "b"]
+    assert parse_tags([None]) == []
+    assert parse_tags(["a", "", "  ", " ", "b"]) == ["a", "b"]
+    assert parse_tags([5, True]) == ["5", "True"]
+
+
+def test_parse_tags_list_output_is_idempotent_after_normalising():
+    once = parse_tags(["high\npriority", None, "settled"])
     assert parse_tags(once) == once
 
 

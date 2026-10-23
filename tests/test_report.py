@@ -38,6 +38,19 @@ def test_report_shows_a_dash_for_a_record_without_tags():
         assert "[]" not in row
 
 
+def test_report_tags_cell_never_breaks_the_row_or_prints_none():
+    from src.report import _cell
+
+    tags = ["high\npriority", None, "set\r\ntled"]
+    assert _cell({"tags": tags}, "tags") == "high priority; set tled"
+    assert _cell({"tags": (None,)}, "tags") == "-"
+    base = {"id": "R-9002", "name": "Wrapped", "amount": 5, "currency": "USD", "region": "NA"}
+    text = render_report([{**base, "tags": tags}])
+    row = next(line for line in text.splitlines() if line.startswith("R-9002"))
+    assert row.endswith("high priority; set tled")
+    assert "None" not in row
+
+
 def test_report_footer_states_the_true_validated_count():
     from src.validate import VALIDATED_FIELDS
 
